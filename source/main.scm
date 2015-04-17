@@ -1,15 +1,6 @@
-#;(begin
-(define (tokenize sexp)
-  (begin
-    (display sexp)
-    (newline)
-    (display "car ")
-    (display (car sexp))
-    (newline)
-    (display "caddr ")
-    (display (caddr sexp))
-    (newline)))
-)
+;; Global variable
+(define vartable '()) ;Table for Variables
+
 
 ;; Intepreter
 (define (interpreter)
@@ -55,7 +46,29 @@
 
 ;; parse
 (define (parse sexp)
-  (display sexp))
+  (let ((func (car sexp)) (arg (cdr sexp)))
+    (cond
+      ((equal? func 'define) (display "define"))
+      ((equal? func 'lambda) (display "lambda"))
+      (else (display "unknown syntax")))))
+
+
+;; create variable object
+(define (createVar name type value)
+  (cons name (cons type (cons value '() ))))
+
+;; add variable to vartable
+(define (addVariable var)
+  (set! vartable (append vartable (cons var '()))))
+
+;; get variable from vartable
+(define (getVariable varname)
+  (getFromVartable vartable varname))
+(define (getFromVartable currenttable varname)
+  (cond
+    ((null? currenttable) #f)
+    ((equal? (caar currenttable) varname) (car currenttable))
+    (else (getFromVariable (cdr currenttable) varname))))
 
 
 (interpreter) ;Run Interpreter
