@@ -19,6 +19,8 @@
           (begin
             (let ((ret (my-eval sexp)))
               (cond 
+                ((eq? ret #t) (iprintln "#t"))
+                ((eq? ret #f) (iprintln "#f"))
                 ((number? ret) (iprintln (number->string ret)))
                 ((symbol? ret) (iprintln (symbol->string ret)))
                 ((string? ret) (iprintln ret))))
@@ -50,9 +52,25 @@
           ((equal? func '-) (fold - args))
           ((equal? func '*) (fold * (cons 1 args )))
           ((equal? func '/) (fold / args))
+          ((equal? func 'number?) (execUnaryFunc number? args))
+          ((equal? func '=) (execBinaryFunc = args))
+          ((equal? func '<) (execBinaryFunc < args))
+          ((equal? func '<=) (execBinaryFunc <= args))
+          ((equal? func '>) (execBinaryFunc > args))
+          ((equal? func '>=) (execBinaryFunc >= args))
           ((equal? func 'define) "define")
           ((equal? func 'lambda) "lambda")
           (else "unknown syntax")))))
+
+;; Macro
+;; if num of args is less than needed return error,else exec function(1arg)
+(define (execUnaryFunc func args)
+  (func (car args)))
+
+;; Macro
+;; if num of args is less than needed return error,else exec function(2arg)
+(define (execBinaryFunc func args)
+  (func (car args) (cadr args)))
 
 ;; atom?
 (define (atom? sexp)
