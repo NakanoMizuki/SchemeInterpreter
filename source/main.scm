@@ -17,7 +17,11 @@
       (if (end? sexp)
           '()
           (begin
-            (iprintln (number->string (my-eval sexp)))
+            (let ((ret (my-eval sexp)))
+              (cond 
+                ((number? ret) (iprintln (number->string ret)))
+                ((symbol? ret) (iprintln (symbol->string ret)))
+                ((string? ret) (iprintln ret))))
             (interpreter-body))))))
 
 ;; Check input whether it is end term
@@ -42,9 +46,9 @@
       sexp ;sexp = atom
       (let ((func (car sexp)) (args (cdr sexp))) ;sexp != atom
         (cond
-          ((equal? func '+) (fold + args))
+          ((equal? func '+) (fold + (cons 0 args )))
           ((equal? func '-) (fold - args))
-          ((equal? func '*) (fold * args))
+          ((equal? func '*) (fold * (cons 1 args )))
           ((equal? func '/) (fold / args))
           ((equal? func 'define) "define")
           ((equal? func 'lambda) "lambda")
@@ -59,9 +63,10 @@
 
 ;;fold (func:procedure which have 2args)
 (define (fold func list)
-  (if (eq? (length list) 1) 
-      (func (car list))
-      (func (car list) (fold-loop func (cdr list)))))
+  (cond
+    ((null? list) '())
+    ((eq? (length list) 1) (func (car list)))
+    (else (func (car list) (fold-loop func (cdr list))))))
 (define (fold-loop func list)
   (cond 
     ((eq? (length list) 1)(car list))
