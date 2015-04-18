@@ -17,12 +17,10 @@
       (if (end? sexp)
           '()
           (begin
-            (if (parsable? sexp)
-                (parse sexp)
-                (iprintln "syntax-error"))
+            (iprintln (number->string (my-eval sexp)))
             (interpreter-body))))))
 
-;; Check whether input is end term
+;; Check input whether it is end term
 (define (end? input)
   (if(equal? input 'quit) #t #f))
 
@@ -37,29 +35,42 @@
 (define (iprintln str)
   (println (string-append " " str)))
 
-;; check sexp format
-(define (parsable? sexp)
+
+;; eval s-expr
+(define (my-eval sexp)
+  (if (atom? sexp) 
+      sexp ;sexp = atom
+      (let ((func (car sexp)) (args (cdr sexp))) ;sexp != atom
+        (cond
+          ((equal? func '+) (fold + args))
+          ((equal? func '-) (fold - args))
+          ((equal? func '*) (fold * args))
+          ((equal? func '/) (fold / args))
+          ((equal? func 'define) "define")
+          ((equal? func 'lambda) "lambda")
+          (else "unknown syntax")))))
+
+;; atom?
+(define (atom? sexp)
   (cond
+    ((pair? sexp) #f)
     ((null? sexp) #f)
-    ((not(list? sexp)) #f)
     (else #t)))
 
-;; parse
-(define (parse sexp)
-  (let ((func (car sexp)) (arg (cdr sexp)))
-    (cond
-      ((equal? func 'define) (display "define"))
-      ((equal? func 'lambda) (display "lambda"))
-      (else (display "unknown syntax")))))
-
-
-;; create variable object
-(define (createVar name type value)
-  (cons name (cons type (cons value '() ))))
+;;fold (func:procedure which have 2args)
+(define (fold func list)
+  (if (eq? (length list) 1) 
+      (func (car list))
+      (func (car list) (fold-loop func (cdr list)))))
+(define (fold-loop func list)
+  (cond 
+    ((eq? (length list) 1)(car list))
+    (else (func(func (car list) (fold-loop func (cdr list)))))))
 
 ;; add variable to vartable
-(define (addVariable var)
-  (set! vartable (append vartable (cons var '()))))
+(define (addVariable name type value)
+  (let ((newvar (cons name (cons type (cons value '() )))))
+    (set! vartable (append vartable (cons newvar '() )))))
 
 ;; get variable from vartable
 (define (getVariable varname)
@@ -69,6 +80,7 @@
     ((null? currenttable) #f)
     ((equal? (caar currenttable) varname) (car currenttable))
     (else (getFromVariable (cdr currenttable) varname))))
+
 
 
 (interpreter) ;Run Interpreter
