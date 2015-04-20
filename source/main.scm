@@ -58,9 +58,19 @@
           ((equal? func '<=) (execBinaryFunc <= args))
           ((equal? func '>) (execBinaryFunc > args))
           ((equal? func '>=) (execBinaryFunc >= args))
-          ((equal? func 'define) "define")
-          ((equal? func 'lambda) "lambda")
-          (else "unknown syntax")))))
+          
+          ((equal? func 'boolean?) (execUnaryFunc boolean? args))
+          ((equal? func 'not) (execUnaryFunc not args))
+          
+          ((equal? func 'string?) (execUnaryFunc string? args))
+          
+          ((equal? func 'procedure?) (execUnaryFunc procedure? args))
+          
+          ((equal? func 'eq?) (execBinaryFunc eq? args))
+          ((equal? func 'neq?) (execBinaryFunc neq? args))
+          ((equal? func 'equal?) (execBinaryFunc equal? args))
+          
+          (else (car args))))))
 
 ;; Macro
 ;; if num of args is less than needed return error,else exec function(1arg)
