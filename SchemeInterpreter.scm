@@ -61,7 +61,7 @@
 	  (loop))))))
 
 ; eval expr in environment
-(define (s(read)i-eval expr env)
+(define (si-eval expr env)
   (cond
     ((self-evaluation? expr) expr)
     ((symbol? expr) (cdr (lookup expr env)))
@@ -76,13 +76,13 @@
       (let ((type (cadr var)) (func (caddr var)) )
 	(cond
 	  ((equal? type 'primitive)
-	   (si-apply-primitive func (cdr expr)))
+	   (si-apply-primitive func (cdr expr) env))
 	  ((equal? type 'syntax) '())
 	  ((equal? type 'closure) '())
 	  (else (error "unknown ")))))))
 
 ; apply primitive function
-(define (si-apply-primitive func params)
+(define (si-apply-primitive func params env)
   (apply func (map (lambda (x) (si-eval x env)) params)))
 
 ; if expr is self-evaluation form, return #t
@@ -102,8 +102,9 @@
   (cond
     ((null? var) env)
     ((symbol? vars) (cons (cons vars vals ) env))
-    (else
-      (cons (cons (car vars) (car vals)) add-var2env((cdr vars) (cdr vals) env)) )))
+    (else (cons 
+	    (cons (car vars) (car vals))
+	    (add-var2env((cdr vars) (cdr vals) env))))))
 
 ; The following, this interpreter's treatment of syntax
 ; quote
