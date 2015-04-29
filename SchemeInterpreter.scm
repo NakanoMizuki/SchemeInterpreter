@@ -76,16 +76,15 @@
       (let ((type (cadr var)) (func (caddr var)) )
 	(cond
 	  ((equal? type 'primitive) 
-	   (si-apply-primitive func 
-			       ; evaluated actual params list
-			       (map (lambda (x) (si-eval x env)) (cdr expr))))
+	   (si-apply-primitive func (cdr expr))
 	  ((equal? type 'syntax) '())
 	  ((equal? type 'closure) '())
 	  (else (error "unknown ")))))))
 
 ; apply primitive function
-(define (si-apply-primitive func actuals)
-  (apply func actuals))
+(define (si-apply-primitive func params)
+  (apply func (map (lambda (x) (si-eval x env)) params)))
+
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
     (and (not (pair? expr)) (not (symbol? expr)) ))
