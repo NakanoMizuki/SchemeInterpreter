@@ -40,7 +40,7 @@
 ;        (list 'neq? 'primitive neq?)
         (list 'equal? 'primitive equal?)
         ; syntax
-        (list 'quote 'syntax si-quote)
+;        (list 'quote 'syntax si-quote)
 ;        (list 'set-car! 'primitive set-car!)
 ;        (list 'set-cdr! 'primitive set-cdr!)
 
@@ -52,9 +52,13 @@
 (define (Interpreter )
     (let loop()
         (display ">>")
-        (display (si-eval (read) '() )) ; read user's input and output its evaluation
-        (newline)
-        (loop)))
+	(let ((input (read)))		; read User's input
+	  (cond 
+	    ((equal? input 'quit) (display "Intepreter end."))	; if input == "quit"
+	    (else 
+	      (display (si-eval input '() )) ; output input evaluation
+	      (newline)
+	      (loop))))))
 
 ; eval expr in environment
 (define (si-eval expr env)
