@@ -75,39 +75,39 @@
       (error "cannot lookup.")
       (let ((type (cadr var)) (func (caddr var)) )
 	(cond
-	  ((equal? type 'primitive) 
-	   (si-apply-primitive func (cdr expr))
-	   ((equal? type 'syntax) '())
-	   ((equal? type 'closure) '())
-	   (else (error "unknown ")))))))
+	  ((equal? type 'primitive)
+	   (si-apply-primitive func (cdr expr)))
+	  ((equal? type 'syntax) '())
+	  ((equal? type 'closure) '())
+	  (else (error "unknown ")))))))
 
-  ; apply primitive function
-  (define (si-apply-primitive func params)
-    (apply func (map (lambda (x) (si-eval x env)) params)))
+; apply primitive function
+(define (si-apply-primitive func params)
+  (apply func (map (lambda (x) (si-eval x env)) params)))
 
-  ; if expr is self-evaluation form, return #t
-  (define (self-evaluation? expr)
-    (and (not (pair? expr)) (not (symbol? expr)) ))
+; if expr is self-evaluation form, return #t
+(define (self-evaluation? expr)
+  (and (not (pair? expr)) (not (symbol? expr)) ))
 
-  ; Lookup var from environment and return (var . value).
-  ; If var don't exist reurn #f.
-  (define (lookup name env)
-    (let ((value (assoc name env))) ; lookup in local environment
-      (if value
-	value
-	(assoc name GLOBAL-ENV)))) ; lookup in global environment
+; Lookup var from environment and return (var . value).
+; If var don't exist reurn #f.
+(define (lookup name env)
+  (let ((value (assoc name env))) ; lookup in local environment
+    (if value
+      value
+      (assoc name GLOBAL-ENV)))) ; lookup in global environment
 
-  ; add (var . val) to environment and return new environment
-  (define (add-var2env vars vals env)
-    (cond
-      ((null? var) env)
-      ((symbol? vars) (cons (cons vars vals ) env))
-      (else
-	(cons (cons (car vars) (car vals)) add-var2env((cdr vars) (cdr vals) env)) )))
+; add (var . val) to environment and return new environment
+(define (add-var2env vars vals env)
+  (cond
+    ((null? var) env)
+    ((symbol? vars) (cons (cons vars vals ) env))
+    (else
+      (cons (cons (car vars) (car vals)) add-var2env((cdr vars) (cdr vals) env)) )))
 
-  ; The following, this interpreter's treatment of syntax
-  ; quote
-  (define (si-quote expr env)
-    (cadr expr))
+; The following, this interpreter's treatment of syntax
+; quote
+(define (si-quote expr env)
+  (cadr expr))
 
-  (Interpreter)
+(Interpreter)
