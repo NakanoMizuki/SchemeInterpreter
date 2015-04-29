@@ -56,7 +56,7 @@
 	  (cond 
 	    ((equal? input 'quit) (display "Intepreter end."))	; if input == "quit"
 	    (else 
-	      (display (si-eval input '() )) ; output input evaluation
+	      (display (si-eval input '() )) ; output evaluation of input
 	      (newline)
 	      (loop))))))
 
@@ -65,21 +65,38 @@
     (cond
         ((self-evaluation? expr) expr)
         ((symbol? expr) (cdr (lookup expr env)))
-        ((pair? expr) "pair" )
-        (else (error "unknown syntax type --si-eval" expr)) ))
+        ((pair? expr) (si-eval-func expr '()))
+	(else (error "Wrong input!"))))
 
-;
+; eval function. expr -> (functionname .args)
+(define (si-eval-func expr env)
+  (let* ((name (car expr)) (var (lookup name env)) )
+    (if (equal? var #f)
+      (error "cannot lookup.")
+      (let ((type (cadr var)) (func (caddr var)) )
+	(cond
+	  ((equal? type 'primitive) 
+	   (si-apply-primitive func 
+			       ; evaluated actual params list
+			       (map (lambda (x) (si-eval x env)) (cdr expr))))
+	  ((equal? type 'syntax) '())
+	  ((equal? type 'closure) '())
+	  (else (error "unknown ")))))))
 
+; apply primitive function
+(define (si-apply-primitive func actuals)
+  (apply func actuals))
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
     (and (not (pair? expr)) (not (symbol? expr)) ))
 
-; lookup var from environment and return (var . value)
-(define (lookup var env)
-    (let ((value (assoc var env))) ; lookup in local environment
+; Lookup var from environment and return (var . value).
+; If var don't exist reurn #f.
+(define (lookup name env)
+    (let ((value (assoc name env))) ; lookup in local environment
         (if value
             value
-            (assoc var GLOBAL-ENV)))) ; lookup in global environment
+            (assoc name GLOBAL-ENV)))) ; lookup in global environment
 
 ; add (var . val) to environment and return new environment
 (define (add-var2env vars vals env)
