@@ -49,12 +49,14 @@
     ))
 
 ; Interpreter body
-(define (Interpreter )
+(define (Interpreter)
+  (display "Interpreter start")
+  (newline)
   (let loop()
     (display ">>")
     (let ((input (read)))		; read User's input
       (cond 
-	((equal? input 'quit) (display "Intepreter end."))	; if input == "quit"
+	((equal? input 'quit) (display "Intepreter end.")(newline)); if input == "quit"
 	(else 
 	  (display (si-eval input '() )) ; output evaluation of input
 	  (newline)
