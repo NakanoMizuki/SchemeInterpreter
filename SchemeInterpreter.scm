@@ -54,38 +54,42 @@
   (newline)
   (let loop()
     (display ">>")
-    (let ((input (read)))		; read User's input
-      (cond 
-	((equal? input 'quit) (display "Intepreter end.")(newline)); if input == "quit"
-	(else 
-	  (display (si-eval input '() )) ; output evaluation of input
-	  (newline)
-	  (loop))))))
+    (let ((input (read)))	; read User's input
+      (cond
+	((equal? input 'quit)
+	 (display "Interpreter End.")
+	 (newline))
+	(else
+	  (let ((output
+		  (call/cc (lambda (return) (si-eval input '() return))))) ; if error occured at evaluation,return here
+	    (display output)
+	    (newline)
+	    (loop)))))))
 
 ; eval expr in environment
-(define (si-eval expr env)
+(define (si-eval expr env return)
   (cond
     ((self-evaluation? expr) expr)
-    ((symbol? expr) (cdr (lookup expr env)))
-    ((pair? expr) (si-eval-func expr '()))
-    (else (error "Wrong input!"))))
+    ((symbol? expr) (cdr (lookup expr env return)))
+    ((pair? expr) (si-eval-func expr '() return))
+    (return "Wrong input!")))
 
 ; eval function. expr -> (functionname .args)
-(define (si-eval-func expr env)
-  (let* ((name (car expr)) (var (lookup name env)) )
+(define (si-eval-func expr env return)
+  (let* ((name (car expr)) (var (lookup name env return)) )
     (if (equal? var #f)
       (error "cannot lookup.")
       (let ((type (cadr var)) (func (caddr var)) )
 	(cond
 	  ((equal? type 'primitive)
-	   (si-apply-primitive func (cdr expr) env))
+	   (si-apply-primitive func (cdr expr) env return))
 	  ((equal? type 'syntax) '())
 	  ((equal? type 'closure) '())
 	  (else (error "unknown ")))))))
 
 ; apply primitive function
-(define (si-apply-primitive func params env)
-  (apply func (map (lambda (x) (si-eval x env)) params)))
+(define (si-apply-primitive func params env return)
+  (apply func (map (lambda (x) (si-eval x env return)) params)))
 
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
@@ -93,11 +97,14 @@
 
 ; Lookup var from environment and return (var . value).
 ; If var don't exist reurn #f.
-(define (lookup name env)
+(define (lookup name env return)
   (let ((value (assoc name env))) ; lookup in local environment
     (if value
       value
-      (assoc name GLOBAL-ENV)))) ; lookup in global environment
+      (let ((gvalue (assoc name GLOBAL-ENV))) ;lookup in global environment
+	(if gvalue
+	  gvalue
+	  (return "Error! cannot lookup valiable"))))))
 
 ; add (var . val) to environment and return new environment
 (define (add-var2env vars vals env)
