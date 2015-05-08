@@ -54,17 +54,17 @@
   (newline)
   (let loop()
     (display ">>")
-    (let ((input (read)))       ; read User's input
+    (let ((input (read)))	; read User's input
       (cond
-        ((equal? input 'quit)
-         (display "Interpreter End.")
-         (newline))
-        (else
-          (let ((output
-                  (call/cc (lambda (return) (si-eval input '() return))))) ; if error occured at evaluation,return here
-            (display output)
-            (newline)
-            (loop)))))))
+	((equal? input 'quit)
+	 (display "Interpreter End.")
+	 (newline))
+	(else
+	  (let ((output
+		  (call/cc (lambda (return) (si-eval input '() return))))) ; if error occured at evaluation,return here
+	    (display output)
+	    (newline)
+	    (loop)))))))
 
 ; eval expr in environment
 (define (si-eval expr env return)
@@ -80,12 +80,12 @@
     (if (equal? var #f)
       (error "cannot lookup.")
       (let ((type (cadr var)) (func (caddr var)) )
-        (cond
-          ((equal? type 'primitive)
-           si-apply-primitive func (cdr expr) env return))
-        ((equal? type 'syntax) '())
-        ((equal? type 'closure) '())
-        (else (error "unknown ")))))))
+	(cond
+	  ((equal? type 'primitive)
+	   (si-apply-primitive func (cdr expr) env return))
+	  ((equal? type 'syntax) '())
+	  ((equal? type 'closure) '())
+	  (else (error "unknown ")))))))
 
 ; apply primitive function
 (define (si-apply-primitive func params env return)
@@ -102,9 +102,9 @@
     (if value
       value
       (let ((gvalue (assoc name GLOBAL-ENV))) ;lookup in global environment
-        (if gvalue
-          gvalue
-          (return "Error! cannot lookup valiable"))))))
+	(if gvalue
+	  gvalue
+	  (return "Error! cannot lookup valiable"))))))
 
 ; add (var . val) to environment and return new environment
 (define (add-var2env vars vals env)
@@ -112,8 +112,8 @@
     ((null? var) env)
     ((symbol? vars) (cons (cons vars vals ) env))
     (else (cons 
-            (cons (car vars) (car vals))
-            (add-var2env((cdr vars) (cdr vals) env))))))
+	    (cons (car vars) (car vals))
+	    (add-var2env((cdr vars) (cdr vals) env))))))
 
 ; The following, this interpreter's treatment of syntax
 ; quote
