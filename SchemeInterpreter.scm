@@ -95,7 +95,7 @@
   (and (not (pair? expr)) (not (symbol? expr)) ))
 
 ; Lookup var from environment and return (var . value).
-; If var don't exist reurn #f.
+; If var don't exist, set reurn to error statemnt. 
 (define (lookup name env return)
   (let ((value (assoc name env))) ; lookup in local environment
     (if value
