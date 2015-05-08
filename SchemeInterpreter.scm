@@ -79,12 +79,12 @@
   (let* ((name (car expr))
          (var (lookup name env return))
          (type (cadr var))
-         (func (caddr var)) )
+         (func (caddr var)))
     (cond
       ((equal? type 'primitive) (si-apply-primitive func (cdr expr) env return))
       ((equal? type 'syntax) '())
       ((equal? type 'closure) '())
-      (else (error "unknown ")))))
+      (else (return "Error! unknown function type")))))
 
 ; apply primitive function
 (define (si-apply-primitive func params env return)
@@ -92,7 +92,7 @@
 
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
-  (and (not (pair? expr)) (not (symbol? expr)) ))
+  (and (not (pair? expr)) (not (symbol? expr))))
 
 ; Lookup var from environment and return (var . value).
 ; If var don't exist, set reurn to error statemnt. 
