@@ -76,16 +76,15 @@
 
 ; eval function. expr -> (functionname .args)
 (define (si-eval-func expr env return)
-  (let* ((name (car expr)) (var (lookup name env return)) )
-    (if (equal? var #f)
-      (error "cannot lookup.")
-      (let ((type (cadr var)) (func (caddr var)) )
-	(cond
-	  ((equal? type 'primitive)
-	   (si-apply-primitive func (cdr expr) env return))
-	  ((equal? type 'syntax) '())
-	  ((equal? type 'closure) '())
-	  (else (error "unknown ")))))))
+  (let* ((name (car expr))
+         (var (lookup name env return))
+         (type (cadr var))
+         (func (caddr var)) )
+    (cond
+      ((equal? type 'primitive) (si-apply-primitive func (cdr expr) env return))
+      ((equal? type 'syntax) '())
+      ((equal? type 'closure) '())
+      (else (error "unknown ")))))
 
 ; apply primitive function
 (define (si-apply-primitive func params env return)
