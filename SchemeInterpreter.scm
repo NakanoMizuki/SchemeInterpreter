@@ -26,24 +26,42 @@
   (cond
     ((self-evaluation? expr) expr)
     ((symbol? expr) (cdr (lookup expr env return)))
-    ((pair? expr) (si-eval-func expr '() return))
+    ((pair? expr) (si-eval-list expr env return))
     (return "Wrong input!")))
 
 ; eval function. expr -> (functionname .args)
-(define (si-eval-func expr env return)
-  (let* ((name (car expr))
-         (var (lookup name env return))
-         (type (cadr var))
-         (func (caddr var)))
+(define (si-eval-list expr env return)
+  (let* ((procedure (si-eval (car expr) env return))
+         (type (car procedure)))
     (cond
-      ((equal? type 'primitive) (si-apply-primitive func (cdr expr) env return))
-      ((equal? type 'syntax) (func expr env return))
-      ((equal? type 'closure) '())
-      (else (return "Error! unknown function type")))))
+      ((equal? type 'syntax) ((cadr procedure) expr env return))
+      (else 
+        (let ((actuals (map (lambda (x) (si-eval x env return)) (cdr expr))))
+          (si-apply-procedure procedure actuals return))))))
 
-; apply primitive function
-(define (si-apply-primitive func params env return)
-  (apply func (map (lambda (x) (si-eval x env return)) params)))
+(define (si-apply-procedure procedure actuals return)
+  (cond
+    ((equal? (car procedure) 'primitive) (apply (cadr procedure) actuals))
+    ((equal? (car procedure) 'closure) (si-apply-closure procedure actuals return))
+    (else (return "Error! unknown procedure's type."))))
+
+
+; apply closure function
+(define (si-apply-closure procedure actuals return)
+  (let* ((expr (cadr procedure))
+         (formals (cadr expr))
+         (body (cddr expr))
+         (func-env (caddr procedure)))
+    (si-eval-body body (add-var2env formals actuals func-env) return)))
+
+; execute all procedure and return last evaluation
+(define (si-eval-body body env return)
+  (cond
+    ((null? (cdr body)) (si-eval (car body) env return))
+    (else
+      (si-eval (car body) env return)
+      (si-eval-body (cdr body) env return))))
+
 
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
@@ -58,30 +76,37 @@
       (let ((gvalue (assoc name GLOBAL-ENV))) ;lookup in global environment
 	(if gvalue
 	  gvalue
-	  (return "Error! cannot lookup valiable"))))))
+	  (return (string-append "Error! undefined variable: " (symbol->string name))))))))
 
 ; add (var . val) to environment and return new environment
 (define (add-var2env vars vals env)
   (cond
-    ((null? var) env)
-    ((symbol? vars) (cons (cons vars vals ) env))
-    (else (cons 
+    ((null? vars) env)
+    ((symbol? vars) (cons (cons vars vals) env))
+    (else 
+      (cons 
 	    (cons (car vars) (car vals))
-	    (add-var2env((cdr vars) (cdr vals) env))))))
+	    (add-var2env (cdr vars) (cdr vals) env)))))
 
-; The following, this interpreter's treatment of syntax
+
+;;; The following, this interpreter's treatment of syntax
 ; quote
 (define (si-quote expr env return)
   (cadr expr))
 
-;define
+; define name expr
 (define (si-define expr env return)
-  (let ((var (cadr expr))
+  (let ((name (cadr expr))
         (val (si-eval (caddr expr) env return)))
-    (set! GLOBAL-ENV (cons (cons var val) GLOBAL-ENV))
+    (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
     val))
 
-; Global environment
+; lambda
+(define (si-lambda expr env return)
+  (list 'closure expr env))
+
+
+;;; Global environment
 (define GLOBAL-ENV
   (list
     (list 'number? 'primitive number?)
@@ -125,7 +150,7 @@
     ; syntax
     (list 'quote 'syntax si-quote)
     (list 'define 'syntax si-define)
-    ;(list 'lambda 'syntax si-lambda)
+    (list 'lambda 'syntax si-lambda)
     ;(list 'set! 'syntax si-set!)
     ;(list 'let 'syntax si-let)
     ;(list 'if 'syntax si-if)
@@ -141,4 +166,5 @@
     ))
 
 
+; run
 (Interpreter)
