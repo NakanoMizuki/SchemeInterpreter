@@ -74,6 +74,13 @@
 (define (si-quote expr env return)
   (cadr expr))
 
+;define
+(define (si-define expr env return)
+  (let ((var (cadr expr))
+        (val (si-eval (caddr expr) env return)))
+    (set! GLOBAL-ENV (cons (cons var val) GLOBAL-ENV))
+    val))
+
 ; Global environment
 (define GLOBAL-ENV
   (list
@@ -117,7 +124,7 @@
     
     ; syntax
     (list 'quote 'syntax si-quote)
-    ;(list 'define 'syntax si-define)
+    (list 'define 'syntax si-define)
     ;(list 'lambda 'syntax si-lambda)
     ;(list 'set! 'syntax si-set!)
     ;(list 'let 'syntax si-let)
