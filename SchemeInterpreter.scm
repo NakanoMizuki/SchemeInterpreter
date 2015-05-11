@@ -114,10 +114,12 @@
 
 ; if
 (define (si-if expr env return)
+  (if (or (< (length expr) 2) (> (length expr) 4))
+    (return "Syntax Error: 'if'"))
   (if (si-eval (cadr expr) env return)
     (si-eval (caddr expr) env return)
-    (if (null? (cddr expr))
-      "<undef>"
+    (if (null? (cdddr expr))
+      'undef-value
       (si-eval (cadddr expr) env return))))
 
 ; set
