@@ -94,12 +94,19 @@
 (define (si-quote expr env return)
   (cadr expr))
 
-; define name expr
 (define (si-define expr env return)
-  (let ((name (cadr expr))
+  (if (pair? (cadr expr))
+    (let ((procedure (car (cadr expr))) ; (define (procedure arg...) body)
+          (args (cdr (cadr expr)))
+          (body (caddr expr)))
+      (set! GLOBAL-ENV (cons
+                         (cons procedure (si-lambda (list 'lambda args body) env return))
+                         GLOBAL-ENV))
+      procedure)
+    (let ((name (cadr expr))            ; (define name expr)
         (val (si-eval (caddr expr) env return)))
-    (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
-    val))
+      (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
+      val)))
 
 ; lambda
 (define (si-lambda expr env return)
