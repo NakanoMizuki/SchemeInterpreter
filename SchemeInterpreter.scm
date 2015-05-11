@@ -117,7 +117,7 @@
   (if (si-eval (cadr expr) env return)
     (si-eval (caddr expr) env return)
     (if (null? (cddr expr))
-      (return "Error! 'if' need else part.")
+      "<undef>"
       (si-eval (cadddr expr) env return))))
 
 ; set
