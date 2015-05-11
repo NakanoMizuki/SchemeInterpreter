@@ -96,6 +96,7 @@
     (return "Syntax-Error!: 'quote'"))
   (cadr expr))
 
+; define
 (define (si-define expr env return)
   (if (not (= (length expr) 3))
     (return "Syntax-Error: 'define'"))
