@@ -98,7 +98,7 @@
 
 ; define
 (define (si-define expr env return)
-  (if (not (= (length expr) 3))
+  (if  (< (length expr) 3)
     (return "Syntax-Error: 'define'"))
   (if (pair? (cadr expr))
     (let ((procedure (car (cadr expr))) ; (define (procedure arg...) body)
@@ -108,10 +108,12 @@
                          (cons procedure (si-lambda (list 'lambda args body) env return))
                          GLOBAL-ENV))
       procedure)
-    (let ((name (cadr expr))            ; (define name expr)
-        (val (si-eval (caddr expr) env return)))
-      (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
-      val)))
+    (if (not (= (length expr) 3))
+      (return "Syntax-Error: 'define'")
+      (let ((name (cadr expr))          ; (define name expr)
+            (val (si-eval (caddr expr) env return)))
+        (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
+        val)))
 
 ; lambda
 (define (si-lambda expr env return)
