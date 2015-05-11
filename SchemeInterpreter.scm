@@ -113,6 +113,14 @@
       (return "Error! 'if' need else part.")
       (si-eval (cadddr expr) env return))))
 
+; set
+(define (si-set! expr env return)
+  (let* ((name (cadr expr))
+        (value (si-eval (caddr expr) env return))
+        (cell (lookup name env return)))
+    (set-cdr! cell value)
+    (cdr cell)))
+  
 ;;; Global environment
 (define GLOBAL-ENV
   (list
@@ -158,7 +166,7 @@
     (list 'quote 'syntax si-quote)
     (list 'define 'syntax si-define)
     (list 'lambda 'syntax si-lambda)
-    ;(list 'set! 'syntax si-set!)
+    (list 'set! 'syntax si-set!)
     ;(list 'let 'syntax si-let)
     (list 'if 'syntax si-if)
     ;(list 'cond 'syntax si-cond)
