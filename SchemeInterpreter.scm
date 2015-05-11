@@ -92,6 +92,8 @@
 ;;; The following, this interpreter's treatment of syntax
 ; quote
 (define (si-quote expr env return)
+  (if (not (= (length expr) 2))
+    (return "Syntax-Error!: 'quote'"))
   (cadr expr))
 
 (define (si-define expr env return)
