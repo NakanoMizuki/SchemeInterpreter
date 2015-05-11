@@ -113,7 +113,7 @@
       (let ((name (cadr expr))          ; (define name expr)
             (val (si-eval (caddr expr) env return)))
         (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
-        val)))
+        name))))
 
 ; lambda
 (define (si-lambda expr env return)
