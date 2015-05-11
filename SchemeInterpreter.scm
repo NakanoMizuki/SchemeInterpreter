@@ -105,6 +105,13 @@
 (define (si-lambda expr env return)
   (list 'closure expr env))
 
+; if
+(define (si-if expr env return)
+  (if (si-eval (cadr expr) env return)
+    (si-eval (caddr expr) env return)
+    (if (null? (cddr expr))
+      (return "Error! 'if' need else part.")
+      (si-eval (cadddr expr) env return))))
 
 ;;; Global environment
 (define GLOBAL-ENV
@@ -153,7 +160,7 @@
     (list 'lambda 'syntax si-lambda)
     ;(list 'set! 'syntax si-set!)
     ;(list 'let 'syntax si-let)
-    ;(list 'if 'syntax si-if)
+    (list 'if 'syntax si-if)
     ;(list 'cond 'syntax si-cond)
     ;(list 'and 'syntax si-and)
     ;(list 'or 'syntax si-or)
