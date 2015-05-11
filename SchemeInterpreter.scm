@@ -97,6 +97,8 @@
   (cadr expr))
 
 (define (si-define expr env return)
+  (if (not (= (length expr) 3))
+    (return "Syntax-Error: 'define'"))
   (if (pair? (cadr expr))
     (let ((procedure (car (cadr expr))) ; (define (procedure arg...) body)
           (args (cdr (cadr expr)))
