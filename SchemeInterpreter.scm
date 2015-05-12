@@ -131,7 +131,7 @@
 
 ; set
 (define (si-set! expr env return)
-  (if (not (= (length expr) 2))
+  (if (not (= (length expr) 3))
     (return "Syntax-Error: 'set!'"))
   (let* ((name (cadr expr))
         (value (si-eval (caddr expr) env return))
