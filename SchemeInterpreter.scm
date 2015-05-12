@@ -8,7 +8,6 @@
   (display "Interpreter start")
   (newline)
   (let loop()
-    (display ">>")
     (let ((input (read)))	; read User's input
       (cond
 	((equal? input 'quit)
@@ -17,6 +16,7 @@
 	(else
 	  (let ((output
 		  (call/cc (lambda (return) (si-eval input '() return))))) ; if error occured at evaluation,return here
+	    (display " >> ")
 	    (display output)
 	    (newline)
 	    (loop)))))))
