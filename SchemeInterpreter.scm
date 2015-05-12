@@ -139,7 +139,32 @@
         (cell (lookup name env return)))
     (set-cdr! cell value)
     (cdr cell)))
-  
+
+; set-car!
+(define (si-set-car! expr env return)
+  (if (not (= (length expr) 3))
+    (return "Syntax Error: 'set-car!'"))
+  (let* ((name (cadr expr))
+         (value (si-eval (caddr expr) env return))
+         (cell (lookup name env return)))
+    (if (not (pair? (cdr cell)))
+      (return (string-append (symbol->string name) "is not pair")))
+    (set-car! (cdr cell) value)
+    UNDEF))
+
+; set-cdr!
+(define (si-set-cdr! expr env return)
+  (if (not (= (length expr) 3))
+    (return "Syntax Error: 'set-car!'"))
+  (let* ((name (cadr expr))
+         (value (si-eval (caddr expr) env return))
+         (cell (lookup name env return)))
+    (if (not (pair? (cdr cell)))
+      (return (string-append (symbol->string name) "is not pair")))
+    (set-cdr! (cdr cell) value)
+    UNDEF))
+
+
 ;;; Global environment
 (define UNDEF "#<undefined>")
 (define GLOBAL-ENV
@@ -187,6 +212,8 @@
     (list 'define 'syntax si-define)
     (list 'lambda 'syntax si-lambda)
     (list 'set! 'syntax si-set!)
+    (list 'set-car! 'syntax si-set-car!)
+    (list 'set-cdr! 'syntax si-set-cdr!)
     ;(list 'let 'syntax si-let)
     (list 'if 'syntax si-if)
     ;(list 'cond 'syntax si-cond)
