@@ -234,6 +234,8 @@
     (list 'load 'syntax si-load)
 
     ; addtional
+    (list 'display 'primitive display)
+    (list 'newline 'primitive newline)
     (list 'assoc 'primitive assoc)
     ))
 
