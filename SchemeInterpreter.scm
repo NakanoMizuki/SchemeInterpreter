@@ -204,9 +204,6 @@
     ;        (list 'neq? 'primitive neq?)
     (list 'equal? 'primitive equal?)
 
-    ;        (list 'set-car! 'primitive set-car!)
-    ;        (list 'set-cdr! 'primitive set-cdr!)
-    
     ; syntax
     (list 'quote 'syntax si-quote)
     (list 'define 'syntax si-define)
