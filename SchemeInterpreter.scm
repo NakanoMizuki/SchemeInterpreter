@@ -164,6 +164,19 @@
     (set-cdr! (cdr cell) value)
     UNDEF))
 
+; load
+(define (si-load expr env return)
+  (if (not (= (length expr) 2))
+    (return "Syntax Error! : load"))
+  (let* ((file (cadr expr))
+        (port (open-input-file file)))
+    (let loop((newexpr (read port)))
+      (if (eof-object? newexpr)
+        (close-input-port port)
+        (begin
+          (si-eval newexpr env return)
+          (loop (read port))))))
+  #t)
 
 ;;; Global environment
 (define UNDEF "#<undefined>")
@@ -218,7 +231,7 @@
     ;(list 'or 'syntax si-or)
     ;(list 'begin 'syntax si-begin)
     ;(list 'do 'syntax si-do)
-    ;(list 'load 'syntax si-load)
+    (list 'load 'syntax si-load)
 
     ; addtional
     (list 'assoc 'primitive assoc)
