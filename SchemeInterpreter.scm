@@ -127,7 +127,7 @@
   (if (si-eval (cadr expr) env return)
     (si-eval (caddr expr) env return)
     (if (null? (cdddr expr))
-      'undef-value
+      UNDEF
       (si-eval (cadddr expr) env return))))
 
 ; set
@@ -141,6 +141,7 @@
     (cdr cell)))
   
 ;;; Global environment
+(define UNDEF "#<undefined>")
 (define GLOBAL-ENV
   (list
     (list 'number? 'primitive number?)
