@@ -89,6 +89,10 @@
 	    (cons (car vars) (car vals))
 	    (add-var2env (cdr vars) (cdr vals) env)))))
 
+; add (name . value) to GLOBAL-ENVIRONMENT
+(define (add2GLOBAL-ENV name value)
+  (set! GLOBAL-ENV (cons (cons name value)
+                         GLOBAL-ENV)))
 
 ;;; The following, this interpreter's treatment of syntax
 ; quote
@@ -102,19 +106,17 @@
   (if  (< (length expr) 3)
     (return "Syntax-Error: 'define'"))
   (if (pair? (cadr expr))
-    (let* ((procedure (car (cadr expr))) ; (define (procedure arg...) body)
+    (let* ((name (car (cadr expr))) ; (define (procedure arg...) body)
           (args (cdr (cadr expr)))
           (body (cddr expr))
           (li (append (list 'lambda args) body)))
-      (set! GLOBAL-ENV (cons
-                         (cons procedure (si-lambda li env return))
-                         GLOBAL-ENV))
-      procedure)
+      (add2GLOBAL-ENV name (si-lambda li env return))
+      name)
     (if (not (= (length expr) 3))
       (return "Syntax-Error: 'define'")
       (let ((name (cadr expr))          ; (define name expr)
             (val (si-eval (caddr expr) env return)))
-        (set! GLOBAL-ENV (cons (cons name val) GLOBAL-ENV))
+        (add2GLOBAL-ENV name val)
         name))))
 
 ; lambda
@@ -188,17 +190,11 @@
           (body (cddr expr))
           (li (append (list 'lambda formals) body))
           (value (si-lambda li env return)))
-      (set! GLOBAL-ENV
-        (cons
-          (cons name (cons 'macro value))
-          GLOBAL-ENV))
+      (add2GLOBAL-ENV name (cons 'macro value))
       name)
     (let ((name (cadr expr))      ; (define-macro name (lambda () ...))
           (value (si-eval (caddr expr) env return)))
-      (set! GLOBAL-ENV
-        (cons
-          (cons name (cons 'macro value))
-          GLOBAL-ENV))
+      (add2GLOBAL-ENV name (cons 'macro value))
       name)))
 
 
