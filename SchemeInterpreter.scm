@@ -182,13 +182,24 @@
 ;;; macro
 ; define macro
 (define (si-define-macro expr env return)
-  (let ((name (cadr expr))
-        (value (si-eval (caddr expr) env return)))
-    (set! GLOBAL-ENV
-      (cons
-        (cons name (cons 'macro value))
-        GLOBAL-ENV))
-    name))
+  (if (and (pair? (cadr expr)))
+    (let* ((name (car (cadr expr)))
+          (formals (cdr (cadr expr)))
+          (body (cddr expr))
+          (li (append (list 'lambda formals) body))
+          (value (si-lambda li env return)))
+      (set! GLOBAL-ENV
+        (cons
+          (cons name (cons 'macro value))
+          GLOBAL-ENV))
+      name)
+    (let ((name (cadr expr))      ; (define-macro name (lambda () ...))
+          (value (si-eval (caddr expr) env return)))
+      (set! GLOBAL-ENV
+        (cons
+          (cons name (cons 'macro value))
+          GLOBAL-ENV))
+      name)))
 
 
 ;;; Global environment
