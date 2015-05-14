@@ -35,6 +35,7 @@
          (type (car procedure)))
     (cond
       ((equal? type 'syntax) ((cadr procedure) expr env return))
+      ((equal? type 'macro) (si-eval (si-apply-procedure (cdr procedure) (cdr expr) return) env return))
       (else 
         (let ((actuals (map (lambda (x) (si-eval x env return)) (cdr expr))))
           (si-apply-procedure procedure actuals return))))))
@@ -178,6 +179,18 @@
           (loop (read port))))))
   #t)
 
+;;; macro
+; define macro
+(define (si-define-macro expr env return)
+  (let ((name (cadr expr))
+        (value (si-eval (caddr expr) env return)))
+    (set! GLOBAL-ENV
+      (cons
+        (cons name (cons 'macro value))
+        GLOBAL-ENV))
+    name))
+
+
 ;;; Global environment
 (define UNDEF "#<undefined>")
 (define GLOBAL-ENV
@@ -232,6 +245,8 @@
     ;(list 'begin 'syntax si-begin)
     ;(list 'do 'syntax si-do)
     (list 'load 'syntax si-load)
+
+    (list 'define-macro 'syntax si-define-macro)
 
     ; addtional
     (list 'display 'primitive display)
