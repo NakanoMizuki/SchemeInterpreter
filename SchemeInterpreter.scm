@@ -280,6 +280,7 @@
     (list 'display 'primitive display)
     (list 'newline 'primitive newline)
     (list 'assoc 'primitive assoc)
+    (list 'map 'primitive map)
     ))
 
 
