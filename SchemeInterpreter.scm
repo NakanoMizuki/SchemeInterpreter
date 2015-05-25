@@ -197,6 +197,24 @@
       (add2GLOBAL-ENV name (cons 'macro value))
       name)))
 
+; back-quote
+(define (si-quasiquote expr env return)
+  (define (replace ls)
+    (if (not (pair? ls))
+      ls
+      (if (not (pair? (car ls)))
+        (cons (car ls) (replace (cdr ls)))
+        (cond
+          ((eq? (caar ls) 'unquote) (cons
+                                      (si-eval (cadar ls) env return)
+                                      (replace (cdr ls))))
+          ((eq? (caar ls) 'unquote-splicing) (append
+                                               (si-eval (cadar ls) env return)
+                                               (replace (cdr ls))))
+          (else (cons (replace (car ls)) (replace (cdr ls))))))))
+  (replace (cadr expr)))
+
+
 
 ;;; Global environment
 (define UNDEF "#<undefined>")
@@ -253,6 +271,8 @@
     ;(list 'do 'syntax si-do)
     (list 'load 'syntax si-load)
 
+    ; macro
+    (list 'quasiquote 'syntax si-quasiquote)
     (list 'define-macro 'syntax si-define-macro)
 
     ; addtional
