@@ -34,3 +34,10 @@
   (lambda (args . body)
     `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args))))
 
+; let*
+(define-macro
+  let*
+  (lambda (args . body)
+    (if (null? (cdr args))
+      `(let ,args ,@body) 
+      `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body)))))
