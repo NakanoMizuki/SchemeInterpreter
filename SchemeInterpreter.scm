@@ -185,7 +185,7 @@
 ;;; macro
 ; define macro
 (define (si-define-macro expr env return)
-  (if (and (pair? (cadr expr)))
+  (if (pair? (cadr expr))
     (let* ((name (car (cadr expr)))
           (formals (cdr (cadr expr)))
           (body (cddr expr))
