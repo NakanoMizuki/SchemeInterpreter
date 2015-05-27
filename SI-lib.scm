@@ -27,6 +27,18 @@
       (if (null? (cdr args))
         (car args)
         `(if ,(car args) (and ,@(cdr args)) #f)))))
+; or
+(define-macro
+  or
+  (lambda args
+    (if (null? args)
+      #t
+      (if (null? (cdr args))
+        (car args)
+        `(let ((+value+ ,(car args)))
+           (if +value+ 
+             +value+
+             (or ,@(cdr args))))))))
 
 ; let
 (define-macro 
