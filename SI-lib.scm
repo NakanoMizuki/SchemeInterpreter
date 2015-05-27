@@ -60,6 +60,19 @@
       `((lambda () UNDEF))
       `((lambda () ,@args)))))
 
+; cond
+(define-macro
+  cond
+  (lambda args
+    (if (null? args)
+      UNDEF
+      (if (and (null? (cdr args)) (equal? (caar args) 'else))
+        `(begin ,@(cdar args))
+        `(if ,(caar args)
+           (begin ,@(cdar args))
+           (cond ,@(cdr args)))))))
+
+
 ; let
 (define-macro 
   let
