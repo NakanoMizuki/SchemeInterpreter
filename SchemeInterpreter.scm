@@ -16,11 +16,18 @@
 	 (newline))
 	(else
 	  (let ((output
-		  (call/cc (lambda (return) (si-eval input '() return))))) ; if error occured at evaluation,return here
+		  (call/cc (lambda (return) (si-topeval input return))))) ; if error occured at evaluation,return here
 	    (display " >> ")
 	    (display output)
 	    (newline)
 	    (loop)))))))
+
+; eval expr at top level
+(define (si-topeval expr return)
+  (cond
+    ((and (pair? expr) (equal? (car expr) 'define))
+     (si-define expr '() return))
+    (else (si-eval expr '() return))))
 
 ; eval expr in environment
 (define (si-eval expr env return)
@@ -60,9 +67,30 @@
 (define (si-eval-body body env return)
   (cond
     ((null? (cdr body)) (si-eval (car body) env return))
+    ((and (pair? (car body)) (equal? (caar body) 'define))  ;internal define
+     (si-eval (replace-body (car body) (cdr body) env return) env return))
     (else
       (si-eval (car body) env return)
       (si-eval-body (cdr body) env return))))
+
+; return new body in which internal-define is replaced to let
+(define (replace-body defexp restbody env return)
+  (if (< (length defexp) 3)
+    (return "Syntax-Error!: internal-define")
+    (cond
+      ((pair? (cadr defexp))
+       (let* ((name (car (cadr defexp)))
+              (args (cdr (cadr defexp)))
+              (defbody (cddr defexp))
+              (lambda-exp (append (list 'lambda args) defbody))
+              (let-args (list (list name lambda-exp))))
+         (append (list 'let let-args) restbody)))
+      ((not (= 3 (length defexp))) (return "Syntax-Error!: internal-define"))
+      (else 
+        (let* ((name (cadr defexp))
+              (val (si-eval (caddr defexp) env return))
+              (let-args (list (list name val))))
+          (append (list 'let let-args) restbody))))))
 
 
 ; if expr is self-evaluation form, return #t
@@ -178,7 +206,7 @@
       (if (eof-object? newexpr)
         (close-input-port port)
         (begin
-          (si-eval newexpr env return)
+          (si-topeval newexpr return)
           (loop (read port))))))
   #t)
 
@@ -258,7 +286,6 @@
 
     ; syntax
     (list 'quote 'syntax si-quote)
-    (list 'define 'syntax si-define)
     (list 'lambda 'syntax si-lambda)
     (list 'set! 'syntax si-set!)
     (list 'set-car! 'syntax si-set-car!)
