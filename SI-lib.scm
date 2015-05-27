@@ -19,6 +19,10 @@
   (if (null? ls)
     '()
     (cons (fn (car ls)) (my-map fn (cdr ls)))))
+(define (my-map2 fn ls1 ls2)
+  (if (null? ls1)
+    '()
+    (cons (fn (car ls1) (car ls2)) (my-map2 fn (cdr ls1) (cdr ls2)))))
 
 ; and
 (define-macro
@@ -63,3 +67,16 @@
     (if (null? (cdr args))
       `(let ,args ,@body) 
       `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body)))))
+
+; letrec
+(define-macro
+  letrec
+  (lambda (args . body)
+    (let* ((names (my-map car args))
+           (vals (my-map cadr args))
+           (let-args (my-map (lambda (x) (list x UNDEF)) names))
+           (let-body (my-map2 (lambda (name val) `(set! ,name ,val)) names vals)))
+      (display (append (append (list 'let let-args) let-body ) body))
+      `(let ,let-args
+         ,@(my-map2 (lambda (name val) (list 'set! name val)) names vals)
+         ,@body))))
