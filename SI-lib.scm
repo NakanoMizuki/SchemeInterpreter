@@ -46,6 +46,12 @@
              +value+
              (or ,@(cdr args))))))))
 
+; neq?
+(define-macro
+  neq?
+  (lambda (x y)
+    (not (eq? x y))))
+
 ; begin
 (define-macro
   begin
