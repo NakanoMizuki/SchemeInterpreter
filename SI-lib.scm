@@ -2,6 +2,8 @@
 ; Nakano Mizuki
 
 
+(define UNDEF "#<undefined>")
+
 ; cxxr
 (define (caar ls)
   (car (car ls)))
@@ -39,6 +41,14 @@
            (if +value+ 
              +value+
              (or ,@(cdr args))))))))
+
+; begin
+(define-macro
+  begin
+  (lambda args
+    (if (null? args)
+      `((lambda () UNDEF))
+      `((lambda () ,@args)))))
 
 ; let
 (define-macro 
