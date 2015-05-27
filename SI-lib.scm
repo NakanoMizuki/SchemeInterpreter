@@ -58,7 +58,12 @@
 (define-macro 
   let
   (lambda (args . body)
-    `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args))))
+    (if (pair? args)
+      `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args))        ; normal let
+      (let* ((vnames (my-map car (car body)))   ; named let
+             (vals (my-map cadr (car body))))
+        `(letrec ((,args (lambda ,vnames ,@(cdr body))))
+           (,args ,@vals))))))
 
 ; let*
 (define-macro
@@ -76,7 +81,6 @@
            (vals (my-map cadr args))
            (let-args (my-map (lambda (x) (list x UNDEF)) names))
            (let-body (my-map2 (lambda (name val) `(set! ,name ,val)) names vals)))
-      (display (append (append (list 'let let-args) let-body ) body))
       `(let ,let-args
          ,@(my-map2 (lambda (name val) (list 'set! name val)) names vals)
          ,@body))))
