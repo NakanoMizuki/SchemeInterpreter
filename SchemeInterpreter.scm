@@ -24,14 +24,14 @@
 	    (loop)))))))
 
 ; eval expr at top level
-(define (si-topeval expr return)
+(define (si-topeval expr return cont)
   (cond
     ((and (pair? expr) (equal? (car expr) 'define))
      (si-define expr '() return))
     (else (si-eval expr '() return))))
 
 ; eval expr in environment
-(define (si-eval expr env return)
+(define (si-eval expr env return cont)
   (cond
     ((self-evaluation? expr) expr)
     ((symbol? expr) (cdr (lookup expr env return)))
@@ -47,7 +47,7 @@
     (else (return "Wrong input!"))))
 
 ; apply procedure
-(define (si-apply procedure actuals return)
+(define (si-apply procedure actuals return cont)
   (cond
     ((equal? (car procedure) 'primitive)
      (apply (cadr procedure) actuals))
@@ -61,7 +61,7 @@
 
 
 ; execute all procedure and return last evaluation
-(define (si-eval-body body env return)
+(define (si-eval-body body env return cont)
   (cond
     ((null? (cdr body)) (si-eval (car body) env return))
     ((and (pair? (car body)) (equal? (caar body) 'define))  ;internal define
@@ -71,7 +71,7 @@
       (si-eval-body (cdr body) env return))))
 
 ; return new body in which internal-define is replaced to let
-(define (replace-body defexp restbody env return)
+(define (replace-body defexp restbody env return cont)
   (if (< (length defexp) 3)
     (return "Syntax-Error!: internal-define")
     (cond
@@ -122,13 +122,13 @@
 
 ;;; The following, this interpreter's treatment of syntax
 ; quote
-(define (si-quote expr env return)
+(define (si-quote expr env return cont)
   (if (not (= (length expr) 2))
     (return "Syntax-Error!: 'quote'"))
   (cadr expr))
 
 ; define
-(define (si-define expr env return)
+(define (si-define expr env return cont)
   (if  (< (length expr) 3)
     (return "Syntax-Error: 'define'"))
   (if (pair? (cadr expr))
@@ -146,11 +146,11 @@
         name))))
 
 ; lambda
-(define (si-lambda expr env return)
+(define (si-lambda expr env return cont)
   (list 'closure expr env))
 
 ; if
-(define (si-if expr env return)
+(define (si-if expr env return cont)
   (if (or (< (length expr) 2) (> (length expr) 4))
     (return "Syntax Error: 'if'"))
   (if (si-eval (cadr expr) env return)
@@ -160,7 +160,7 @@
       (si-eval (cadddr expr) env return))))
 
 ; set
-(define (si-set! expr env return)
+(define (si-set! expr env return cont)
   (if (not (= (length expr) 3))
     (return "Syntax-Error: 'set!'"))
   (let* ((name (cadr expr))
@@ -170,7 +170,7 @@
     (cdr cell)))
 
 ; set-car!
-(define (si-set-car! expr env return)
+(define (si-set-car! expr env return cont)
   (if (not (= (length expr) 3))
     (return "Syntax Error: 'set-car!'"))
   (let* ((name (cadr expr))
@@ -182,7 +182,7 @@
     UNDEF))
 
 ; set-cdr!
-(define (si-set-cdr! expr env return)
+(define (si-set-cdr! expr env return cont)
   (if (not (= (length expr) 3))
     (return "Syntax Error: 'set-car!'"))
   (let* ((name (cadr expr))
@@ -194,7 +194,7 @@
     UNDEF))
 
 ; load
-(define (si-load expr env return)
+(define (si-load expr env return cont)
   (if (not (= (length expr) 2))
     (return "Syntax Error! : load"))
   (let* ((file (cadr expr))
@@ -209,7 +209,7 @@
 
 ;;; macro
 ; define macro
-(define (si-define-macro expr env return)
+(define (si-define-macro expr env return cont)
   (if (pair? (cadr expr))
     (let* ((name (car (cadr expr)))
           (formals (cdr (cadr expr)))
@@ -224,7 +224,7 @@
       name)))
 
 ; back-quote
-(define (si-quasiquote expr env return)
+(define (si-quasiquote expr env return cont)
   (define (replace ls)
     (if (not (pair? ls))
       ls
