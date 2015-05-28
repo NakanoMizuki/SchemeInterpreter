@@ -6,6 +6,7 @@
 ; Interpreter body
 (define (Interpreter)
   (si-load (list 'load "./SI-lib.scm") '() '())
+  (si-load (list 'load "./Test.scm") '() '())
   (display "Interpreter start")
   (newline)
   (let loop()
@@ -34,38 +35,30 @@
   (cond
     ((self-evaluation? expr) expr)
     ((symbol? expr) (cdr (lookup expr env return)))
-    ((pair? expr) (si-eval-list expr env return))
-    (return "Wrong input!")))
+    ((pair? expr)
+     (let* ((procedure (si-eval (car expr) env return))
+            (type (car procedure)))
+       (cond
+         ((equal? type 'syntax) ((cadr procedure) expr env return))
+         ((equal? type 'macro) (si-eval (si-apply (cdr procedure) (cdr expr) return) env return))
+         (else 
+           (let ((actuals (map (lambda (x) (si-eval x env return)) (cdr expr))))
+             (si-apply procedure actuals return))))))
+    (else (return "Wrong input!"))))
 
-; eval function. expr -> (functionname .args)
-(define (si-eval-list expr env return)
-  (let* ((procedure (si-eval (car expr) env return))
-         (type (car procedure)))
-    (cond
-      ((equal? type 'syntax) ((cadr procedure) expr env return))
-      ((equal? type 'macro) (si-eval (si-apply (cdr procedure) (cdr expr) return) env return))
-      (else 
-        (let ((actuals (map (lambda (x) (si-eval x env return)) (cdr expr))))
-          (si-apply procedure actuals return))))))
-
-; apply function (actuals is evaled)
+; apply procedure
 (define (si-apply procedure actuals return)
   (cond
-    ((equal? (car procedure) 'primitive)(si-apply-primitive procedure actuals return)) 
-    ((equal? (car procedure) 'closure) (si-apply-closure procedure actuals return))
+    ((equal? (car procedure) 'primitive)
+     (apply (cadr procedure) actuals))
+    ((equal? (car procedure) 'closure) 
+     (let* ((expr (cadr procedure))
+            (formals (cadr expr))
+            (body (cddr expr))
+            (func-env (caddr procedure)))
+       (si-eval-body body (add-var2env formals actuals func-env) return)))
     (else (return "Error! unknown procedure's type."))))
 
-; apply primitive function
-(define (si-apply-primitive procedure actuals return)
-  (apply (cadr procedure) actuals))
-
-; apply closure function
-(define (si-apply-closure procedure actuals return)
-  (let* ((expr (cadr procedure))
-         (formals (cadr expr))
-         (body (cddr expr))
-         (func-env (caddr procedure)))
-    (si-eval-body body (add-var2env formals actuals func-env) return)))
 
 ; execute all procedure and return last evaluation
 (define (si-eval-body body env return)
