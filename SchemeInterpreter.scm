@@ -307,6 +307,10 @@
     (list 'display 'primitive display)
     (list 'newline 'primitive newline)
     (list 'assoc 'primitive assoc)
+    (list 'read 'primitive read)
+    (list 'open-input-file 'primitive open-input-file)
+    (list 'eof-object? 'primitive eof-object?)
+    (list 'close-input-port 'primitive close-input-port)
     ))
 
 
