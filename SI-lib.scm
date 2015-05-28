@@ -90,6 +90,24 @@
            (begin ,@(cdar args))
            (cond ,@(cdr args)))))))
 
+; do
+(define-macro
+  do
+  (lambda (binds test . body)
+    (let ((names (my-map car binds))
+          (inits (my-map cadr binds))
+          (updates (my-map cddr binds)))
+      `(letrec ((loop 
+                  (lambda ,names
+                    (if ,(car test)
+                      (begin ,@(cdr test))
+                      (begin
+                        ,@body
+                        (loop ,@(my-map2 (lambda (x y)
+                                           (if (null? x) y (car x)))
+                                         updates
+                                         names)))))))
+         (loop ,@inits)))))
 
 ; let
 (define-macro 
