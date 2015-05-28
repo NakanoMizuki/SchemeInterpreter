@@ -43,17 +43,21 @@
          (type (car procedure)))
     (cond
       ((equal? type 'syntax) ((cadr procedure) expr env return))
-      ((equal? type 'macro) (si-eval (si-apply-procedure (cdr procedure) (cdr expr) return) env return))
+      ((equal? type 'macro) (si-eval (si-apply (cdr procedure) (cdr expr) return) env return))
       (else 
         (let ((actuals (map (lambda (x) (si-eval x env return)) (cdr expr))))
-          (si-apply-procedure procedure actuals return))))))
+          (si-apply procedure actuals return))))))
 
-(define (si-apply-procedure procedure actuals return)
+; apply function (actuals is evaled)
+(define (si-apply procedure actuals return)
   (cond
-    ((equal? (car procedure) 'primitive) (apply (cadr procedure) actuals))
+    ((equal? (car procedure) 'primitive)(si-apply-primitive procedure actuals return)) 
     ((equal? (car procedure) 'closure) (si-apply-closure procedure actuals return))
     (else (return "Error! unknown procedure's type."))))
 
+; apply primitive function
+(define (si-apply-primitive procedure actuals return)
+  (apply (cadr procedure) actuals))
 
 ; apply closure function
 (define (si-apply-closure procedure actuals return)
@@ -290,14 +294,9 @@
     (list 'set! 'syntax si-set!)
     (list 'set-car! 'syntax si-set-car!)
     (list 'set-cdr! 'syntax si-set-cdr!)
-    ;(list 'let 'syntax si-let)
     (list 'if 'syntax si-if)
-    ;(list 'cond 'syntax si-cond)
-    ;(list 'and 'syntax si-and)
-    ;(list 'or 'syntax si-or)
-    ;(list 'begin 'syntax si-begin)
-    ;(list 'do 'syntax si-do)
     (list 'load 'syntax si-load)
+
 
     ; macro
     (list 'quasiquote 'syntax si-quasiquote)
