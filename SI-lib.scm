@@ -14,7 +14,25 @@
 (define (cddr ls)
   (cdr (cdr ls)))
 
-; map
+; cxxxr
+(define (caaar ls)
+  (car (caar ls)))
+(define (caadr ls)
+  (car (cadr ls)))
+(define (cadar ls)
+  (car (cdar ls)))
+(define (caddr ls)
+  (car (cddr ls)))
+(define (cdaar ls)
+  (cdr (caar ls)))
+(define (cdadr ls)
+  (cdr (cadr ls)))
+(define (cddar ls)
+  (cdr (cdar ls)))
+(define (cdddr ls)
+  (cdr (cddr ls)))
+
+;map
 (define (my-map fn ls)
   (if (null? ls)
     '()
