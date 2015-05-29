@@ -49,7 +49,7 @@
                   ((equal? (car procedure) 'syntax) ((cadr procedure) expr env return cont))
                   ((equal? (car procedure) 'macro)
                    (si-apply (cdr procedure) (cdr expr) return
-                             (lambda (new-expr) (si-eval newexpr env return cont))))
+                             (lambda (newexpr) (si-eval newexpr env return cont))))
                   (else                                        ; 'closure or 'primitive
                     (si-eval-args (cdr expr) env return
                                (lambda (actuals)
@@ -261,7 +261,7 @@
                  (lambda (x) (cont (cons (car ls) x))))
         (cond
           ((eq? (caar ls) 'unquote)
-           (si-eval (cadr ls) env return
+           (si-eval (cadar ls) env return
                     (lambda (x)                                 ; x is evaled value
                       (replace (cdr ls) 
                                (lambda (y)                      ; y is replaced value
@@ -270,7 +270,7 @@
            (si-eval (cadar ls) env return
                     (lambda (x)
                       (replace (cdr ls) 
-                               (cont (append x y))))))
+                               (lambda (y) (cont (append x y)))))))
           (else 
             (replace (car ls)
                      (lambda (x) 
