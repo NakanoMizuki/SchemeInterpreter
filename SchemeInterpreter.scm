@@ -32,12 +32,6 @@
 
 ; eval expr in environment
 (define (si-eval expr env return cont)
-  (display "expr:")
-  (display expr)
-  (newline)
-  (display "cont:")
-  (display cont)
-  (newline)
   (cond
     ((self-evaluation? expr) (cont expr))
     ((symbol? expr) (cont (cdr (lookup expr env return))))
@@ -69,7 +63,10 @@
 (define (si-apply procedure actuals return cont)
   (cond
     ((equal? (car procedure) 'primitive)
-     (cont (apply (cadr procedure) actuals)))
+     (cond
+       ((equal? (cadr procedure) 'call/cc) (si-call/cc (car actuals) return cont))
+       ((equal? (cadr procedure) 'continuation) ((caddr procedure) (car actuals)))
+       (else (cont (apply (cadr procedure) actuals)))))
     ((equal? (car procedure) 'closure) 
      (let* ((expr (cadr procedure))
             (formals (cadr expr))
@@ -233,6 +230,12 @@
           (loop (read port))))))
   (cont #t))
 
+; call/cc
+(define (si-call/cc procedure return cont)
+  (si-apply procedure
+            (list (list 'primitive 'continuation cont))
+            return cont))
+
 ;;; macro
 ; define macro
 (define (si-define-macro expr env return cont)
@@ -284,6 +287,7 @@
 (define UNDEF "#<undefined>")
 (define GLOBAL-ENV
   (list
+    ; primitive
     (list 'number? 'primitive number?)
     (list '+ 'primitive +)
     (list '- 'primitive -)
@@ -318,6 +322,9 @@
     (list 'eq? 'primitive eq?)
     ;        (list 'neq? 'primitive neq?)
     (list 'equal? 'primitive equal?)
+
+    ; additional primitive
+    (list 'call/cc 'primitive 'call/cc)
 
     ; syntax
     (list 'quote 'syntax si-quote)
