@@ -185,8 +185,9 @@
 (define (si-set! expr env return cont)
   (if (not (= (length expr) 3))
     (return "Syntax-Error: 'set!'"))
-  (let* ((name (cadr expr)))
-    (si-eval (caddr expr) env
+  (let* ((name (cadr expr))
+         (cell (lookup name env return)))
+    (si-eval (caddr expr) env return
              (lambda(value)
                (set-cdr! cell value)
                (cont (cdr cell))))))
