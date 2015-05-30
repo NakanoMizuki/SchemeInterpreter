@@ -115,7 +115,7 @@
         (let ((name (cadr defexp)))
           (si-eval (caddr defexp) env return
                    (lambda (value)
-                     (cont (append (list 'let (list (list name value))) restbody)))))))))
+                     (cont (append (list 'letrec (list (list name value))) restbody)))))))))
 
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
