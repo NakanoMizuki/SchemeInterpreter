@@ -42,12 +42,12 @@
                   ((not (pair? procedure)) (return "Error! : isn't procedure."))
                   ((equal? (car procedure) 'syntax) ((cadr procedure) expr env return cont))
                   ((equal? (car procedure) 'macro)
-                   (si-apply (cdr procedure) (cdr expr) return
+                   (si-apply-procedure (cdr procedure) (cdr expr) return
                              (lambda (newexpr) (si-eval newexpr env return cont))))
                   (else                                        ; 'closure or 'primitive
                     (si-eval-args (cdr expr) env return
                                (lambda (actuals)
-                                 (si-apply procedure actuals return cont))))))))
+                                 (si-apply-procedure procedure actuals return cont))))))))
     (else (return "Error! Wrong input!"))))
 
 ; eval args 
@@ -60,12 +60,13 @@
                              (lambda (y) (cont  (cons x y))))))))
 
 ; apply procedure
-(define (si-apply procedure actuals return cont)
+(define (si-apply-procedure procedure actuals return cont)
   (cond
     ((equal? (car procedure) 'primitive)
      (cond
        ((equal? (cadr procedure) 'call/cc) (si-call/cc (car actuals) return cont))
        ((equal? (cadr procedure) 'continuation) ((caddr procedure) (car actuals)))
+       ((equal? (cadr procedure) 'apply) (si-apply (car actuals) (cdr actuals) return cont))
        (else (cont (apply (cadr procedure) actuals)))))
     ((equal? (car procedure) 'closure) 
      (let* ((expr (cadr procedure))
@@ -74,6 +75,15 @@
             (func-env (caddr procedure)))
        (si-eval-body body (add-var2env formals actuals func-env) return cont)))
     (else (return "Error! unknown procedure's type."))))
+
+; primitive apply
+(define (si-apply procedure actuals return cont)
+  (define (flatten li)
+    (cond
+      ((null? li) '())
+      ((not (pair? li)) (list li))
+      (else (append (flatten (car li)) (flatten (cdr li))))))
+  (si-apply-procedure procedure (flatten actuals) return cont))
 
 ; execute all procedure and return last evaluation
 (define (si-eval-body body env return cont)
@@ -233,7 +243,7 @@
 
 ; call/cc
 (define (si-call/cc procedure return cont)
-  (si-apply procedure
+  (si-apply-procedure procedure
             (list (list 'primitive 'continuation cont))
             return cont))
 
@@ -346,6 +356,7 @@
     (list 'newline 'primitive newline)
     (list 'assoc 'primitive assoc)
     (list 'read 'primitive read)
+    (list 'apply 'primitive 'apply)
     (list 'open-input-file 'primitive open-input-file)
     (list 'eof-object? 'primitive eof-object?)
     (list 'close-input-port 'primitive close-input-port)
