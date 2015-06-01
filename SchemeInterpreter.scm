@@ -78,12 +78,12 @@
 
 ; primitive apply
 (define (si-apply procedure actuals return cont)
+  (define (flatten li)
+    (cond
+      ((null? li) '())
+      ((not (pair? li)) (list li))
+      (else (append (flatten (car li)) (flatten (cdr li))))))
   (si-apply-procedure procedure (flatten actuals) return cont))
-(define (flatten li)
-  (cond
-    ((null? li) '())
-    ((not (pair? li)) (list li))
-    (else (append (flatten (car li)) (flatten (cdr li))))))
 
 ; execute all procedure and return last evaluation
 (define (si-eval-body body env return cont)
@@ -98,7 +98,7 @@
                (lambda (x)
                  (si-eval-body (cdr body) env return cont))))))
 
-; return new body in which internal-define is replaced to let
+; return new body in which internal-define is replaced to letrec
 (define (replace-body defexp restbody env return cont)
   (if (< (length defexp) 3)
     (return "Syntax-Error!: internal-define")
@@ -109,13 +109,13 @@
               (defbody (cddr defexp))
               (lambda-exp (append (list 'lambda args) defbody))
               (let-args (list (list name lambda-exp))))
-         (cont (append (list 'let let-args) restbody))))
+         (cont (append (list 'letrec let-args) restbody))))
       ((not (= 3 (length defexp))) (return "Syntax-Error!: internal-define"))
       (else 
         (let ((name (cadr defexp)))
           (si-eval (caddr defexp) env return
                    (lambda (value)
-                     (cont (append (list 'let (list (list name value))) restbody)))))))))
+                     (cont (append (list 'letrec (list (list name value))) restbody)))))))))
 
 ; if expr is self-evaluation form, return #t
 (define (self-evaluation? expr)
