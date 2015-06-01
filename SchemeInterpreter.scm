@@ -78,12 +78,11 @@
 
 ; primitive apply
 (define (si-apply procedure actuals return cont)
-  (define (flatten li)
-    (cond
-      ((null? li) '())
-      ((not (pair? li)) (list li))
-      (else (append (flatten (car li)) (flatten (cdr li))))))
-  (si-apply-procedure procedure (flatten actuals) return cont))
+  (define (gather-actuals ls)
+    (if (null? (cdr ls))
+      (car ls)
+      (cons (car ls) (gather-actuals (cdr ls)))))
+  (si-apply-procedure procedure (gather-actuals actuals) return cont))
 
 ; execute all procedure and return last evaluation
 (define (si-eval-body body env return cont)
