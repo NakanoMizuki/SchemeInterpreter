@@ -189,7 +189,7 @@
                (si-eval (caddr expr) env return cont)
                (if (null? (cdddr expr))
                  (cont UNDEF)
-                 (si-eval (cadddr expr) env return cont))))))
+                 (si-eval (car (cdddr expr)) env return cont))))))
 
 ; set
 (define (si-set! expr env return cont)
