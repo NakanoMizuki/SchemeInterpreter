@@ -117,12 +117,16 @@
 (define-macro 
   let
   (lambda (args . body)
-    (if (pair? args)
-      `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args))        ; normal let
-      (let* ((vnames (my-map car (car body)))   ; named let
-             (vals (my-map cadr (car body))))
-        `(letrec ((,args (lambda ,vnames ,@(cdr body))))
-           (,args ,@vals))))))
+    (cond
+      ((null? args) (error-ret "Syntax-Error!: let"))
+      ((null? body) (error-ret "Syntax-Error!: let"))
+      ((pair? args) `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args)))        ; normal let
+      ((pair? body)
+       (let* ((vnames (my-map car (car body)))   ; named let
+              (vals (my-map cadr (car body))))
+         `(letrec ((,args (lambda ,vnames ,@(cdr body))))
+            (,args ,@vals))))
+      (else (error-ret "Syntax-Error!: let")))))
 
 ; let*
 (define-macro
