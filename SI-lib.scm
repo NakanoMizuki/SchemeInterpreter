@@ -84,54 +84,72 @@
   (lambda args
     (if (null? args)
       UNDEF
-      (if (and (null? (cdr args)) (equal? (caar args) 'else))
-        `(begin ,@(cdar args))
-        `(if ,(caar args)
-           (begin ,@(cdar args))
-           (cond ,@(cdr args)))))))
+      (if (not (pair? args))
+        (error-ret "Syntax-Error!: cond")
+        (if (not (pair? (car args)))
+          (error-ret "Syntax-Error!: cond")
+          (if (equal? (caar args) 'else)
+            (if (null? (cdr args))
+              `(begin ,@(cdar args))
+              (error-ret "Syntax-Error!: cond: else "))
+            `(if ,(caar args)
+               (begin ,@(cdar args))
+               (cond ,@(cdr args)))))))))
 
 ; do
 (define-macro
   do
   (lambda (binds test . body)
-    (let ((names (my-map car binds))
-          (inits (my-map cadr binds))
-          (updates (my-map cddr binds)))
-      `(letrec ((loop 
-                  (lambda ,names
-                    (if ,(car test)
-                      (begin ,@(cdr test))
-                      (begin
-                        ,@body
-                        (loop ,@(my-map2 (lambda (x y)
-                                           (if (null? x) y (car x)))
-                                         updates
-                                         names)))))))
-         (loop ,@inits)))))
+    (cond
+      ((not (pair? binds)) (error-ret "Syntax-Error!: do"))
+      ((> (length binds) 3) (error-ret "Syntax-Error!: do")) 
+      (else 
+        (let ((names (my-map car binds))
+              (inits (my-map cadr binds))
+              (updates (my-map cddr binds)))
+          `(letrec ((loop 
+                      (lambda ,names
+                        (if ,(car test)
+                          (begin ,@(cdr test))
+                          (begin
+                            ,@body
+                            (loop ,@(my-map2 (lambda (x y)
+                                               (if (null? x) y (car x)))
+                                             updates
+                                             names)))))))
+             (loop ,@inits)))))))
 
 ; let
 (define-macro 
   let
   (lambda (args . body)
-    (if (pair? args)
-      `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args))        ; normal let
-      (let* ((vnames (my-map car (car body)))   ; named let
-             (vals (my-map cadr (car body))))
-        `(letrec ((,args (lambda ,vnames ,@(cdr body))))
-           (,args ,@vals))))))
+    (cond
+      ((null? args) (error-ret "Syntax-Error!: let"))
+      ((null? body) (error-ret "Syntax-Error!: let"))
+      ((pair? args) `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args)))        ; normal let
+      ((not (pair? body)) (error-ret "Syntax-Error!: named-let"))
+      ((or (null? (car body)) (pair? (car body)))
+       (let* ((vnames (my-map car (car body)))   ; named let
+              (vals (my-map cadr (car body))))
+         `(letrec ((,args (lambda ,vnames ,@(cdr body))))
+            (,args ,@vals))))
+      (else (error-ret "Syntax-Error!: let")))))
 
 ; let*
 (define-macro
   let*
   (lambda (args . body)
-    (if (null? (cdr args))
-      `(let ,args ,@body) 
-      `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body)))))
+    (cond 
+      ((not (pair? args)) (error-ret "Syntax-Error!: let*"))
+      ((null? (cdr args)) `(let ,args ,@body))
+      (else `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body))))))
 
 ; letrec
 (define-macro
   letrec
   (lambda (args . body)
+    (if (not (pair? args))
+      (error-ret "Syntax-error!: letrec"))
     (let* ((names (my-map car args))
            (vals (my-map cadr args))
            (let-args (my-map (lambda (x) (list x UNDEF)) names))
