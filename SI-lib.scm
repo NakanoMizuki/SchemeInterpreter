@@ -132,9 +132,10 @@
 (define-macro
   let*
   (lambda (args . body)
-    (if (null? (cdr args))
-      `(let ,args ,@body) 
-      `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body)))))
+    (cond 
+      ((not (pair? args)) (error-ret "Syntax-Error!: let*"))
+      ((null? (cdr args)) `(let ,args ,@body))
+      (else `(let (,(cons (caar args) (cdar args))) (let* ,(cdr args) ,@body))))))
 
 ; letrec
 (define-macro
