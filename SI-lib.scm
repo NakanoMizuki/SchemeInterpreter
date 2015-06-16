@@ -128,6 +128,8 @@
       ((null? body) (error-ret "Syntax-Error!: let"))
       ((pair? args) `((lambda ,(my-map car args) ,@body) ,@(my-map cadr args)))        ; normal let
       ((pair? body)
+       (if (not (pair? (car body)))
+         (error-ret "Syntax-error!: let"))
        (let* ((vnames (my-map car (car body)))   ; named let
               (vals (my-map cadr (car body))))
          `(letrec ((,args (lambda ,vnames ,@(cdr body))))
