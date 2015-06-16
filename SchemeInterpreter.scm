@@ -149,7 +149,6 @@
 ;;; The following, this interpreter's treatment of syntax
 ; when occur error
 (define (error-ret expr env return cont)
-  (display "error-ret")
   (return (cadr expr)))
 
 
