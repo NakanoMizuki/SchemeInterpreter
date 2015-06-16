@@ -318,7 +318,7 @@
     (list 'list? 'primitive list?)
     (list 'length 'primitive length)
     (list 'memq 'primitive memq)
-    ;        (list 'last 'primitive last)
+    (list 'last 'primitive last)
     (list 'append 'primitive append)
     (list 'symbol? 'primitive symbol?)
     (list 'car 'primitive car)
