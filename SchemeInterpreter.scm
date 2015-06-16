@@ -7,13 +7,13 @@
 (define (Interpreter)
   (si-load (list 'load "./SI-lib.scm") '() '() (lambda(x)x))
   (si-load (list 'load "./Test.scm") '() '() (lambda(x)x))
-  (display "Interpreter start")
+  (display "-----Interpreter start-----")
   (newline)
   (let loop()
     (let ((input (read)))	; read User's input
       (cond
 	((equal? input 'quit)
-	 (display "Interpreter End.")
+	 (display "-----Interpreter End-----")
 	 (newline))
 	(else
 	  (let ((output
