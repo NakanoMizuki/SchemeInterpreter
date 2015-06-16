@@ -147,6 +147,12 @@
                          GLOBAL-ENV)))
 
 ;;; The following, this interpreter's treatment of syntax
+; when occur error
+(define (error-ret expr env return cont)
+  (display "error-ret")
+  (return (cadr expr)))
+
+
 ; quote
 (define (si-quote expr env return cont)
   (if (not (= (length expr) 2))
@@ -344,6 +350,8 @@
     (list 'set-cdr! 'syntax si-set-cdr!)
     (list 'if 'syntax si-if)
     (list 'load 'syntax si-load)
+
+    (list 'error-ret 'syntax error-ret)
 
 
     ; macro
