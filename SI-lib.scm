@@ -84,11 +84,17 @@
   (lambda args
     (if (null? args)
       UNDEF
-      (if (and (null? (cdr args)) (equal? (caar args) 'else))
-        `(begin ,@(cdar args))
-        `(if ,(caar args)
-           (begin ,@(cdar args))
-           (cond ,@(cdr args)))))))
+      (if (not (pair? args))
+        (error-ret "Syntax-Error!: cond")
+        (if (not (pair? (car args)))
+          (error-ret "Syntax-Error!: cond")
+          (if (equal? (caar args) 'else)
+            (if (null? (cdr args))
+              `(begin ,@(cdar args))
+              (error-ret "Syntax-Error!: cond: else "))
+            `(if ,(caar args)
+               (begin ,@(cdar args))
+               (cond ,@(cdr args)))))))))
 
 ; do
 (define-macro
