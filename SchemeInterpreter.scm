@@ -335,7 +335,6 @@
     (list 'number->string 'primitive number->string)
     (list 'procedure? 'primitive procedure?)
     (list 'eq? 'primitive eq?)
-    ;        (list 'neq? 'primitive neq?)
     (list 'equal? 'primitive equal?)
 
     ; additional primitive
