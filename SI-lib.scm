@@ -147,6 +147,8 @@
 (define-macro
   letrec
   (lambda (args . body)
+    (if (not (pair? args))
+      (error-ret "Syntax-error!: letrec"))
     (let* ((names (my-map car args))
            (vals (my-map cadr args))
            (let-args (my-map (lambda (x) (list x UNDEF)) names))
