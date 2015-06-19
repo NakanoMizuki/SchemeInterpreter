@@ -6,7 +6,6 @@
 ; Interpreter body
 (define (Interpreter)
   (si-load (list 'load "./SI-lib.scm") '() '() (lambda(x)x))
-  (si-load (list 'load "./Test.scm") '() '() (lambda(x)x))
   (display "-----Interpreter start-----")
   (newline)
   (let loop()
